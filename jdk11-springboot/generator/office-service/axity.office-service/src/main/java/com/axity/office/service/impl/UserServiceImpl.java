@@ -101,17 +101,17 @@ public class UserServiceImpl implements UserService
     boolean emailExists = userPersistence.findByEmail(dto.getEmail()).isPresent();
     boolean usernameExists = userPersistence.findByUsername(dto.getUsername()).isPresent();
     if (emailExists || usernameExists){
-      genericMsg("usuario");
+      genericMsg("usuario",12);
     }
     if (dto.getRoles().isEmpty()){
-      genericMsg("rol");
+      genericMsg("rol",13);
     }
     
     boolean roleExists;
     for (var role : dto.getRoles()) {
       roleExists = rolePersistence.findById(role.getId()).isPresent();
       if (!roleExists || role.getId() == null) {
-        genericMsg("rol");
+        genericMsg("rol",14);
       }
     }
  
@@ -133,9 +133,9 @@ public class UserServiceImpl implements UserService
     return new GenericResponseDto<>( dto );
   }
 
-  public GenericResponseDto<UserDto> genericMsg( String msg ){
+  public GenericResponseDto<UserDto> genericMsg( String msg , int code ){
       GenericResponseDto<UserDto> genericResponse = new GenericResponseDto<>();
-      genericResponse.setHeader(new HeaderDto(12, "Error, El " + msg + " no es valido"));
+      genericResponse.setHeader(new HeaderDto(code, "Error, El " + msg + " no es valido"));
       return genericResponse;
   }
 
