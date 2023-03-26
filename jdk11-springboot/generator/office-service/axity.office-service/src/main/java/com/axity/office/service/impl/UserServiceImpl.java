@@ -99,23 +99,23 @@ public class UserServiceImpl implements UserService
   public GenericResponseDto<UserDto> create( UserDto dto )
   {
     boolean emailExists = userPersistence.findByEmail(dto.getEmail()).isPresent();
-	  boolean usernameExists = userPersistence.findByUsername(dto.getUsername()).isPresent();
-	  if (emailExists || usernameExists)
+    boolean usernameExists = userPersistence.findByUsername(dto.getUsername()).isPresent();
+    if (emailExists || usernameExists)
     {
-      GenericResponseDto<UserDto> genericResponse = new GenericResponseDto<>();
-      genericResponse.setHeader(
-        new HeaderDto(ErrorCode.USER_ALREADY_EXISTS.getCode(), "Error. User selected already exist."));
+    	GenericResponseDto<UserDto> genericResponse = new GenericResponseDto<>();
+    	genericResponse.setHeader(
+    			new HeaderDto(ErrorCode.USER_ALREADY_EXISTS.getCode(), "Error. User selected already exist."));
 	    return genericResponse;
-	  }
-
+	}
+    
     List <Integer> ids = dto.getRoles().stream().map(x -> x.getId()).collect(Collectors.toList());
     var roles = this.rolePersistence.findAllById(ids); //
 
     if (roles.size() != dto.getRoles().size() || roles.isEmpty()) 
     {
-      GenericResponseDto<UserDto> genericResponse = new GenericResponseDto<>();
+    	GenericResponseDto<UserDto> genericResponse = new GenericResponseDto<>();
 	    genericResponse.setHeader(
-        new HeaderDto(ErrorCode.ROLE_NOT_FOUND.getCode(), "Error. Role selected does not exist."));
+	    		new HeaderDto(ErrorCode.ROLE_NOT_FOUND.getCode(), "Error. Role selected does not exist."));
 	    return genericResponse;  
     }
 
