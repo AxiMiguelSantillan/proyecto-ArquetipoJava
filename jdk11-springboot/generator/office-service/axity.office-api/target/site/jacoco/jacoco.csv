@@ -1,9 +1,0 @@
-GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
-office-api,com.axity.office,Application,5,3,0,0,2,1,1,1,1,1
-office-api,com.axity.office.handler,ValidationExceptionHandler,33,3,0,0,5,1,2,1,2,1
-office-api,com.axity.office.controller,UserController,19,64,1,1,4,15,3,7,2,7
-office-api,com.axity.office.controller,OfficeController,19,64,1,1,4,15,3,7,2,7
-office-api,com.axity.office.controller,CountryController,19,64,1,1,4,15,3,7,2,7
-office-api,com.axity.office.controller,TerritoryController,19,64,1,1,4,15,3,7,2,7
-office-api,com.axity.office.controller,HomeController,15,3,0,0,4,1,1,1,1,1
-office-api,com.axity.office.controller,RoleController,19,64,1,1,4,15,3,7,2,7

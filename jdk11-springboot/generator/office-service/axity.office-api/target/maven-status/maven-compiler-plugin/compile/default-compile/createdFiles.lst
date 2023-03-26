@@ -1,8 +1,0 @@
-com\axity\office\controller\OfficeController.class
-com\axity\office\controller\HomeController.class
-com\axity\office\controller\UserController.class
-com\axity\office\controller\CountryController.class
-com\axity\office\Application.class
-com\axity\office\handler\ValidationExceptionHandler.class
-com\axity\office\controller\TerritoryController.class
-com\axity\office\controller\RoleController.class
