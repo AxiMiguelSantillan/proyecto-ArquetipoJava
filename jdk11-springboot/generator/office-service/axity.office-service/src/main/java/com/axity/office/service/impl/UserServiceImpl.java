@@ -1,30 +1,30 @@
 package com.axity.office.service.impl;
- 
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
- 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
- 
+
+import com.axity.office.commons.response.HeaderDto;
+import com.axity.office.model.RoleDO;
+import com.axity.office.persistence.RolePersistence;
 import com.axity.office.commons.dto.UserDto;
 import com.axity.office.commons.enums.ErrorCode;
 import com.axity.office.commons.exception.BusinessException;
 import com.axity.office.commons.request.MessageDto;
 import com.axity.office.commons.request.PaginatedRequestDto;
 import com.axity.office.commons.response.GenericResponseDto;
-import com.axity.office.commons.response.HeaderDto;
 import com.axity.office.commons.response.PaginatedResponseDto;
 import com.axity.office.model.UserDO;
 import com.axity.office.model.QUserDO;
-import com.axity.office.model.RoleDO;
-import com.axity.office.persistence.RolePersistence;
 import com.axity.office.persistence.UserPersistence;
 import com.axity.office.service.UserService;
 import com.github.dozermapper.core.Mapper;
@@ -43,8 +43,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Transactional
 @Slf4j
-public class UserServiceImpl implements UserService
-{
+public class UserServiceImpl implements UserService {
   @Autowired
   private UserPersistence userPersistence;
 
@@ -53,23 +52,22 @@ public class UserServiceImpl implements UserService
 
   @Autowired
   private RolePersistence rolePersistence;
-  
+
   /**
    * {@inheritDoc}
    */
   @Override
-  public PaginatedResponseDto<UserDto> findUsers( PaginatedRequestDto request )
-  {
-    log.debug( "%s", request );
+  public PaginatedResponseDto<UserDto> findUsers(PaginatedRequestDto request) {
+    log.debug("%s", request);
 
     int page = request.getOffset() / request.getLimit();
-    Pageable pageRequest = PageRequest.of( page, request.getLimit(), Sort.by( "id" ) );
+    Pageable pageRequest = PageRequest.of(page, request.getLimit(), Sort.by("id"));
 
-    var paged = this.userPersistence.findAll( pageRequest );
+    var paged = this.userPersistence.findAll(pageRequest);
 
-    var result = new PaginatedResponseDto<UserDto>( page, request.getLimit(), paged.getTotalElements() );
+    var result = new PaginatedResponseDto<UserDto>(page, request.getLimit(), paged.getTotalElements());
 
-    paged.stream().forEach( x -> result.getData().add( this.transform( x ) ) );
+    paged.stream().forEach(x -> result.getData().add(this.transform(x)));
 
     return result;
   }
@@ -78,15 +76,13 @@ public class UserServiceImpl implements UserService
    * {@inheritDoc}
    */
   @Override
-  public GenericResponseDto<UserDto> find( Integer id )
-  {
+  public GenericResponseDto<UserDto> find(Integer id) {
     GenericResponseDto<UserDto> response = null;
 
-    var optional = this.userPersistence.findById( id );
-    if( optional.isPresent() )
-    {
+    var optional = this.userPersistence.findById(id);
+    if (optional.isPresent()) {
       response = new GenericResponseDto<>();
-      response.setBody( this.transform( optional.get() ) );
+      response.setBody(this.transform(optional.get()));
     }
 
     return response;
@@ -96,99 +92,80 @@ public class UserServiceImpl implements UserService
    * {@inheritDoc}
    */
   @Override
-  public GenericResponseDto<UserDto> create( UserDto dto )
-  {
+  public GenericResponseDto<UserDto> create(UserDto dto) {
     boolean emailExists = userPersistence.findByEmail(dto.getEmail()).isPresent();
     boolean usernameExists = userPersistence.findByUsername(dto.getUsername()).isPresent();
-    if (emailExists || usernameExists){
-      genericMsg("usuario");
-    }
-    if (dto.getRoles().isEmpty()){
-      genericMsg("rol");
-    }
-    
-    boolean roleExists;
-    for (var role : dto.getRoles()) {
-      roleExists = rolePersistence.findById(role.getId()).isPresent();
-      if (!roleExists || role.getId() == null) {
-        genericMsg("rol");
-      }
-    }
- 
-    UserDO entity = new UserDO();
-    this.mapper.map( dto, entity );
-    entity.setId(null);
-
-    var roles = new ArrayList<RoleDO>();
-    entity.setRoles(roles);
-    
-    
-    dto.getRoles().stream().forEach(r->{
-      entity.getRoles().add(this.rolePersistence.findById(r.getId()).get());
-    });
- 
-    this.userPersistence.save( entity );
-    dto.setId(entity.getId());
- 
-    return new GenericResponseDto<>( dto );
-  }
-
-  public GenericResponseDto<UserDto> genericMsg( String msg ){
+    if (emailExists || usernameExists) {
       GenericResponseDto<UserDto> genericResponse = new GenericResponseDto<>();
-      genericResponse.setHeader(new HeaderDto(12, "Error, El " + msg + " no es valido"));
+      genericResponse.setHeader(
+          new HeaderDto(ErrorCode.USER_ALREADY_EXISTS.getCode(), "Error. User selected already exist."));
       return genericResponse;
+    }
+
+    List<Integer> ids = dto.getRoles().stream().map(x -> x.getId()).collect(Collectors.toList());
+    var roles = this.rolePersistence.findAllById(ids); //
+
+    if (roles.size() != dto.getRoles().size() || roles.isEmpty()) {
+      GenericResponseDto<UserDto> genericResponse = new GenericResponseDto<>();
+      genericResponse.setHeader(
+          new HeaderDto(ErrorCode.ROLE_NOT_FOUND.getCode(), "Error. Role selected does not exist."));
+      return genericResponse;
+    }
+
+    var entity = this.mapper.map(dto, UserDO.class);
+    entity.setRoles(roles);
+    this.userPersistence.save(entity);
+
+    GenericResponseDto<UserDto> response = new GenericResponseDto<>();
+    response.setBody(this.transform(entity));
+
+    return response;
+
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public GenericResponseDto<Boolean> update( UserDto dto )
-  {
-    var optional = this.userPersistence.findById( dto.getId() );
-    if( optional.isEmpty() )
-    {
-      throw new BusinessException( ErrorCode.OFFICE_NOT_FOUND );
+  public GenericResponseDto<Boolean> update(UserDto dto) {
+    var optional = this.userPersistence.findById(dto.getId());
+    if (optional.isEmpty()) {
+      throw new BusinessException(ErrorCode.OFFICE_NOT_FOUND);
     }
 
     var entity = optional.get();
-    
-     
-    entity.setUsername( dto.getUsername() );
-    entity.setEmail( dto.getEmail() );
-    entity.setName( dto.getName() );
-    entity.setLastName( dto.getLastName() );
-    // TODO: Actualizar entity.Roles (?) 
 
-    this.userPersistence.save( entity );
+    entity.setUsername(dto.getUsername());
+    entity.setEmail(dto.getEmail());
+    entity.setName(dto.getName());
+    entity.setLastName(dto.getLastName());
+    // TODO: Actualizar entity.Roles (?)
 
-    return new GenericResponseDto<>( true );
+    this.userPersistence.save(entity);
+
+    return new GenericResponseDto<>(true);
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public GenericResponseDto<Boolean> delete( Integer id )
-  {
-    var optional = this.userPersistence.findById( id );
-    if( optional.isEmpty() )
-    {
-      throw new BusinessException( ErrorCode.OFFICE_NOT_FOUND );
+  public GenericResponseDto<Boolean> delete(Integer id) {
+    var optional = this.userPersistence.findById(id);
+    if (optional.isEmpty()) {
+      throw new BusinessException(ErrorCode.OFFICE_NOT_FOUND);
     }
 
     var entity = optional.get();
-    this.userPersistence.delete( entity );
+    this.userPersistence.delete(entity);
 
-    return new GenericResponseDto<>( true );
+    return new GenericResponseDto<>(true);
   }
 
-  private UserDto transform( UserDO entity )
-  {
+  private UserDto transform(UserDO entity) {
     UserDto dto = null;
-    if( entity != null )
-    {
-      dto = this.mapper.map( entity, UserDto.class );
+    if (entity != null) {
+      dto = this.mapper.map(entity, UserDto.class);
     }
     return dto;
   }

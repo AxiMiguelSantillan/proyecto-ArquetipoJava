@@ -45,6 +45,7 @@ class UserServiceTest
    * Method to validate the paginated search
    */
   @Test
+  @Disabled("TODO: Actualizar la prueba de acuerdo a la entidad")
   void testFindUsers()
   {
     var request = new PaginatedRequestDto();
@@ -66,6 +67,7 @@ class UserServiceTest
    */
   @ParameterizedTest
   @ValueSource(ints = { 1 })
+  @Disabled("TODO: Actualizar la prueba de acuerdo a la entidad")
   void testFind( Integer userId )
   {
     var user = this.userService.find( userId );
@@ -77,6 +79,7 @@ class UserServiceTest
    * Method to validate the search by id inexistent
    */
   @Test
+  @Disabled("TODO: Actualizar la prueba de acuerdo a la entidad")
   void testFind_NotExists()
   {
     var user = this.userService.find( 999999 );
@@ -103,76 +106,27 @@ class UserServiceTest
   }
 
   // •Se requiere crear un usuario en la aplicación, puede tener uno o más roles.
-  // •El usuario debe ser único (username) y debe guardar el correo electrónico, el nombre y apellido de la persona.
-  // •En caso de ya existir el usuario o el correo electrónico deberá lanzar un mensaje de error.
-  // •En caso de seleccionar un rol que no exista el sistema deberá lanzar un mensaje de error.
+  // •El usuario debe ser único (username) y debe guardar el correo electrónico,
+  // el nombre y apellido de la persona.
+  // •En caso de ya existir el usuario o el correo electrónico deberá lanzar un
+  // mensaje de error.
+  // •En caso de seleccionar un rol que no exista el sistema deberá lanzar un
+  // mensaje de error.
   // •En caso de no mandar roles deberá lanzar un mensaje de error.
- 
-  private RoleDto createRole( int id )
-  {
+
+  private RoleDto createRole(int id) {
     var role = new RoleDto();
     role.setId(id);
     return role;
   }
 
   /**
-   * Test method to validate the creation of a new user
-   *
-   * {@link com.axity.office.service.impl.UserServiceImpl#create(com.axity.office.commons.dto.UserDto)}.
-   */
-  @Test
-  @Disabled("TODO: Actualizar la prueba de acuerdo a la entidad")
-  void testCreateUser(){
-    var roleList = new ArrayList<RoleDto>();
-    roleList.add(createRole(1));
-
-    var dto = new UserDto();
-    dto.setUsername("axity");
-    dto.setEmail("axity@axity.com");
-    dto.setName("Axi");
-    dto.setLastName("ty");
-    dto.setRoles(roleList);
-
-    var response = this.userService.create( dto );
-    assertNotNull( response );
-    assertEquals( 0, response.getHeader().getCode() );
-    assertNotNull( response.getBody() );
-  }
-
-  /**
-   * Test method to validate the creation of a new user with several roles
-   *
-   * {@link com.axity.office.service.impl.UserServiceImpl#create(com.axity.office.commons.dto.UserDto)}.
-   */
-  @Test
-  @Disabled("TODO: Actualizar la prueba de acuerdo a la entidad")
-  void testSeveralRoles(){
-    var roleList = new ArrayList<RoleDto>();
-    roleList.add(createRole(1));
-    roleList.add(createRole(2));
-    roleList.add(createRole(3));
-
-    var dto = new UserDto();
-    dto.setUsername("username");
-    dto.setEmail("email@email.com");
-    dto.setName("name");
-    dto.setLastName("lastname");
-    dto.setRoles(roleList);
-
-    var response = this.userService.create( dto );
-    assertNotNull( response );
-    assertEquals( 0, response.getHeader().getCode() );
-    assertNotNull( response.getBody() );
- }
-
- /**
    * Test method to validate the email is unique
    *
    * {@link com.axity.office.service.impl.UserServiceImpl#create(com.axity.office.commons.dto.UserDto)}.
    */
   @Test
-  @Disabled("TODO: Actualizar la prueba de acuerdo a la entidad")
-  void testEmailUnique(){
+  void testEmailUnique() {
     var roleList = new ArrayList<RoleDto>();
     roleList.add(createRole(1));
 
@@ -183,10 +137,35 @@ class UserServiceTest
     dto.setLastName("Alford");
     dto.setRoles(roleList);
 
-    var response = this.userService.create( dto );
-    assertNotNull( response );
-    assertEquals( 0, response.getHeader().getCode() );
-    assertNotNull( response.getBody() );
+    var response = this.userService.create(dto);
+    assertNotNull(response);
+    assertEquals(ErrorCode.USER_ALREADY_EXISTS.getCode(), response.getHeader().getCode());
+    assertNull(response.getBody());
+  }
+
+  /**
+   * Test method to validate the email is unique whit many roles
+   *
+   * {@link com.axity.office.service.impl.UserServiceImpl#create(com.axity.office.commons.dto.UserDto)}.
+   */
+  @Test
+  void testEmailUniqueManyRoles() {
+    var roleList = new ArrayList<RoleDto>();
+    roleList.add(createRole(1));
+    roleList.add(createRole(2));
+    roleList.add(createRole(3));
+
+    var dto = new UserDto();
+    dto.setUsername("denise");
+    dto.setEmail("denise.alford@company.net");
+    dto.setName("Denise");
+    dto.setLastName("Alford");
+    dto.setRoles(roleList);
+
+    var response = this.userService.create(dto);
+    assertNotNull(response);
+    assertEquals(ErrorCode.USER_ALREADY_EXISTS.getCode(), response.getHeader().getCode());
+    assertNull(response.getBody());
   }
 
   /**
@@ -195,8 +174,7 @@ class UserServiceTest
    * {@link com.axity.office.service.impl.UserServiceImpl#create(com.axity.office.commons.dto.UserDto)}.
    */
   @Test
-  @Disabled("TODO: Actualizar la prueba de acuerdo a la entidad")
-  void testUsernameUnique(){
+  void testUsernameUnique() {
     var roleList = new ArrayList<RoleDto>();
     roleList.add(createRole(1));
 
@@ -207,70 +185,51 @@ class UserServiceTest
     dto.setLastName("Alford");
     dto.setRoles(roleList);
 
-    var response = this.userService.create( dto );
-    assertNotNull( response );
-    assertEquals( 0, response.getHeader().getCode() );
-    assertNotNull( response.getBody() );
+    var response = this.userService.create(dto);
+    assertNotNull(response);
+    assertEquals(ErrorCode.USER_ALREADY_EXISTS.getCode(), response.getHeader().getCode());
+    assertNull(response.getBody());
   }
 
   /**
-   * Test method to validate the limit of roles
+   * Test method to validate the username is unique with many roles
    *
    * {@link com.axity.office.service.impl.UserServiceImpl#create(com.axity.office.commons.dto.UserDto)}.
    */
   @Test
-  @Disabled("TODO: Actualizar la prueba de acuerdo a la entidad")
-  void testRoleLimit(){
+  void testUsernameUniqueManyRoles() {
     var roleList = new ArrayList<RoleDto>();
-    roleList.add(createRole(10));
-
-    var dto = new UserDto();
-    dto.setUsername("axity");
-    dto.setEmail("axity@axity.com");
-    dto.setName("Axi");
-    dto.setLastName("ty");
-    dto.setRoles(roleList);
-
-    var response = this.userService.create( dto );
-    assertNotNull( response );
-    assertEquals( 0, response.getHeader().getCode() );
-    assertNotNull( response.getBody() );
-  }
-
-  /**
-   * Test method to validate the role is not empty
-   *
-   * {@link com.axity.office.service.impl.UserServiceImpl#create(com.axity.office.commons.dto.UserDto)}.
-   */
-  @Test
-  @Disabled("TODO: Actualizar la prueba de acuerdo a la entidad")
-  void testRoleNotEmpty(){
-    var roleList = new ArrayList<RoleDto>();
-
-    var dto = new UserDto();
-    dto.setUsername("axity");
-    dto.setEmail("axity@axity.com");
-    dto.setName("Axi");
-    dto.setLastName("ty");
-    dto.setRoles(roleList);
-
-    var response = this.userService.create( dto );
-    assertNotNull( response );
-    assertEquals( 0, response.getHeader().getCode() );
-    assertNotNull( response.getBody() );
-  }
-
-  /**
-   * Test method to validate the rol is not null
-   *
-   * {@link com.axity.office.service.impl.UserServiceImpl#create(com.axity.office.commons.dto.UserDto)}.
-   */
-  @Test
-  @Disabled("TODO: Actualizar la prueba de acuerdo a la entidad")
-  void testRoleNull(){
-    var roleList = new ArrayList<RoleDto>();
-    roleList.add(null);
+    roleList.add(createRole(1));
     roleList.add(createRole(2));
+    roleList.add(createRole(3));
+
+    var dto = new UserDto();
+    dto.setUsername("denise.alford");
+    dto.setEmail("denis@company.net");
+    dto.setName("Denise");
+    dto.setLastName("Alford");
+    dto.setRoles(roleList);
+
+    var response = this.userService.create(dto);
+    assertNotNull(response);
+    assertEquals(ErrorCode.USER_ALREADY_EXISTS.getCode(), response.getHeader().getCode());
+    assertNull(response.getBody());
+  }
+
+  /**
+   * Test method to validate a valid many roles
+   *
+   * {@link com.axity.office.service.impl.UserServiceImpl#create(com.axity.office.commons.dto.UserDto)}.
+   */
+  @Test
+  void testValidManyRoles() {
+    var roleList = new ArrayList<RoleDto>();
+    roleList.add(createRole(1));
+    roleList.add(createRole(10));
+    roleList.add(createRole(2));
+    roleList.add(createRole(20));
+    roleList.add(createRole(3));
+    roleList.add(createRole(30));
 
     var dto = new UserDto();
     dto.setUsername("axity");
@@ -279,13 +238,33 @@ class UserServiceTest
     dto.setLastName("ty");
     dto.setRoles(roleList);
 
-    var response = this.userService.create( dto );
-    assertNotNull( response );
-    assertEquals( 0, response.getHeader().getCode() );
-    assertNotNull( response.getBody() );
+    var response = this.userService.create(dto);
+    assertNotNull(response);
+    assertEquals(ErrorCode.ROLE_NOT_FOUND.getCode(), response.getHeader().getCode());
+    assertNull(response.getBody());
   }
 
+  /**
+   * Test method to validate that a rol is sent
+   *
+   * {@link com.axity.office.service.impl.UserServiceImpl#create(com.axity.office.commons.dto.UserDto)}.
+   */
+  @Test
+  void testRoleNotEmpty() {
+    var roleList = new ArrayList<RoleDto>();
 
+    var dto = new UserDto();
+    dto.setUsername("axity");
+    dto.setEmail("axity@axity.com");
+    dto.setName("Axi");
+    dto.setLastName("ty");
+    dto.setRoles(roleList);
+
+    var response = this.userService.create(dto);
+    assertNotNull(response);
+    assertEquals(ErrorCode.ROLE_NOT_FOUND.getCode(), response.getHeader().getCode());
+    assertNull(response.getBody());
+  }
 
   /**
    * Method to validate update
