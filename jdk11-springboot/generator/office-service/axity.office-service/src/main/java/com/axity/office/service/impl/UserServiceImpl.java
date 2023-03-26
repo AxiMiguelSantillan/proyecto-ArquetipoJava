@@ -126,16 +126,6 @@ public class UserServiceImpl implements UserService
 
     dto.setId(entity.getId());
     return new GenericResponseDto<>( dto );
-
-    // var entity = this.mapper.map( dto, UserDO.class );
-    // entity.setRoles(roles);
-    // this.userPersistence.save( entity );
-
-    // GenericResponseDto<UserDto> response = new GenericResponseDto<>();
-    // response.setBody( this.transform( entity ) );
-
-    // return response;
-      
   }
 
   /**
