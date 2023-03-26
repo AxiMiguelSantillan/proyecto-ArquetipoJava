@@ -107,7 +107,10 @@ public class UserServiceImpl implements UserService
     			new HeaderDto(ErrorCode.USER_ALREADY_EXISTS.getCode(), "Error. User selected already exist."));
 	    return genericResponse;
 	}
-    
+    UserDO entity = new UserDO();
+    this.mapper.map( dto, entity );
+    entity.setId(null);    
+
     List <Integer> ids = dto.getRoles().stream().map(x -> x.getId()).collect(Collectors.toList());
     var roles = this.rolePersistence.findAllById(ids); //
 
@@ -118,15 +121,20 @@ public class UserServiceImpl implements UserService
 	    		new HeaderDto(ErrorCode.ROLE_NOT_FOUND.getCode(), "Error. Role selected does not exist."));
 	    return genericResponse;  
     }
-
-    var entity = this.mapper.map( dto, UserDO.class );
     entity.setRoles(roles);
     this.userPersistence.save( entity );
 
-    GenericResponseDto<UserDto> response = new GenericResponseDto<>();
-    response.setBody( this.transform( entity ) );
+    dto.setId(entity.getId());
+    return new GenericResponseDto<>( dto );
 
-    return response;
+    // var entity = this.mapper.map( dto, UserDO.class );
+    // entity.setRoles(roles);
+    // this.userPersistence.save( entity );
+
+    // GenericResponseDto<UserDto> response = new GenericResponseDto<>();
+    // response.setBody( this.transform( entity ) );
+
+    // return response;
       
   }
 
